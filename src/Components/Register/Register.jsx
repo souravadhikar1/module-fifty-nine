@@ -1,6 +1,12 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  sendEmailVerification,
+} from "firebase/auth";
 import app from "../../firebase/firebase.config";
+import { Link } from "react-router-dom";
+import { Toast } from "bootstrap";
 
 const auth = getAuth(app);
 
@@ -38,11 +44,18 @@ const Register = () => {
         setError("");
         form.reset();
         setSuccess("user has been created");
+        sendEmailVerification(result.user);
       })
       .catch((error) => {
         console.error(error);
         setError(error.message);
       });
+  };
+
+  const sendVerificationEmail = (email) => {
+    sendEmailVerification(user).then((result) => {
+      alert("please verify your Mail");
+    });
   };
 
   const handleEmailChange = (event) => {
@@ -78,6 +91,11 @@ const Register = () => {
         <br />
         <input className="btn btn-primary" type="submit" value="Register" />
       </form>
+      <p>
+        <small>
+          Already you have an account? Please<Link to="/login">Login</Link>
+        </small>
+      </p>
       <p className="text-danger">{error}</p>
       <p className="text-success">{success}</p>
     </div>
