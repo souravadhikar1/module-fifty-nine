@@ -1,13 +1,19 @@
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import React, { useState } from "react";
+import {
+  getAuth,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import React, { useRef, useState } from "react";
 import app from "../../firebase/firebase.config";
 import { Link } from "react-router-dom";
+// import { Toaster, toast } from "react-hot-toast";
 
 const auth = getAuth(app);
 
 const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const emailRef = useRef();
 
   const handleLogin = (event) => {
     event.preventDefault();
@@ -32,10 +38,29 @@ const Login = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((result) => {
         const loggedUser = result.user;
+        if (!loggedUser.emailVerified) {
+          alert("Please enter valid email");
+        }
         setSuccess("Login Successfully");
         setError("");
       })
       .catch((error) => {
+        setError(error.message);
+      });
+  };
+  // password reset
+  const handleResetPassword = (event) => {
+    const email = emailRef.current.value;
+    if (!email) {
+      alert("Please Provide your email address to reset Password");
+      return;
+    }
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert("Please check your email");
+      })
+      .catch((error) => {
+        console.log(error);
         setError(error.message);
       });
   };
@@ -47,6 +72,7 @@ const Login = () => {
         <input
           className="w-50 mb-4 rounded ps-3"
           type="email"
+          ref={emailRef}
           name="email"
           id="email"
           placeholder="Your Email"
@@ -64,6 +90,14 @@ const Login = () => {
         <br />
         <input className="btn btn-primary" type="submit" value="Login" />
       </form>
+      <p>
+        <small>
+          Forget Password?Please{" "}
+          <button onClick={handleResetPassword} className="btn btn-link">
+            Reset Password
+          </button>
+        </small>
+      </p>
       <p>
         <small>
           New to this Website? Please<Link to="/register">Register</Link>

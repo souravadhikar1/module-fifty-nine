@@ -6,7 +6,7 @@ import {
 } from "firebase/auth";
 import app from "../../firebase/firebase.config";
 import { Link } from "react-router-dom";
-import { Toast } from "bootstrap";
+// import { Toast } from "bootstrap";
 
 const auth = getAuth(app);
 
@@ -21,9 +21,11 @@ const Register = () => {
     setSuccess("");
     setError("");
     const form = event.target;
+    const name = form.name.value;
     const email = form.email.value;
     const password = form.password.value;
-    console.log(email, password);
+    console.log(email, password, name);
+
     //   validate
 
     if (!/(?=.*?[A-Z])/.test(password)) {
@@ -44,7 +46,8 @@ const Register = () => {
         setError("");
         form.reset();
         setSuccess("user has been created");
-        sendEmailVerification(result.user);
+        sendVerificationEmail(result.user);
+        updateUserData(result.user, name);
       })
       .catch((error) => {
         console.error(error);
@@ -56,6 +59,18 @@ const Register = () => {
     sendEmailVerification(user).then((result) => {
       alert("please verify your Mail");
     });
+  };
+
+  const updateUserData = (user, name) => {
+    up(user, {
+      displayName: name,
+    })
+      .then(() => {
+        console.log("user name updated");
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
   };
 
   const handleEmailChange = (event) => {
@@ -71,6 +86,15 @@ const Register = () => {
       <form onSubmit={handleSubmit}>
         <input
           className="w-50 mb-4 rounded ps-3"
+          type="text"
+          name="name"
+          id="name"
+          placeholder="Your Name"
+          required
+        />
+        <br />
+        <input
+          className="w-50 mb-4 rounded ps-3"
           onChange={handleEmailChange}
           type="email"
           name="email"
@@ -78,6 +102,7 @@ const Register = () => {
           placeholder="Your Email"
           required
         />
+
         <br />
         <input
           className="w-50 mb-4 rounded ps-3"
